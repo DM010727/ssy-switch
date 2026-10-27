@@ -145,6 +145,7 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
       - name: Import persistent self-signed certificate
+        timeout-minutes: 3
         shell: pwsh
         env:
           WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
@@ -156,6 +157,7 @@ jobs:
           try {
             [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
             $password = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+            Write-Host 'Importing the signing identity into the temporary runner'
             $certs = @(Import-PfxCertificate -FilePath $pfx -CertStoreLocation Cert:\CurrentUser\My -Password $password)
           } finally { Remove-Item -LiteralPath $pfx -Force -ErrorAction SilentlyContinue }
           if ($certs.Count -ne 1) { throw 'PFX must contain exactly one signing identity' }
@@ -165,9 +167,11 @@ jobs:
           # Trust the public certificate only on this disposable runner so Windows can verify the self-signed files.
           $cer = Join-Path $env:RUNNER_TEMP 'ssy-signing.cer'
           Export-Certificate -Cert $cert -FilePath $cer | Out-Null
-          & certutil.exe -user -f -addstore Root $cer | Out-Null
+          Write-Host 'Adding the public certificate to the temporary runner trust store'
+          & certutil.exe -f -addstore Root $cer | Out-Null
           if ($LASTEXITCODE -ne 0) { throw 'Failed to trust certificate on the runner' }
-          & certutil.exe -user -f -addstore TrustedPublisher $cer | Out-Null
+          Write-Host 'Adding the public certificate to trusted publishers'
+          & certutil.exe -f -addstore TrustedPublisher $cer | Out-Null
           if ($LASTEXITCODE -ne 0) { throw 'Failed to add trusted publisher on the runner' }
           Remove-Item -LiteralPath $cer -Force
           "WINDOWS_CERT_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
