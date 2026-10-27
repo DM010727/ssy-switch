@@ -165,8 +165,10 @@ jobs:
           # Trust the public certificate only on this disposable runner so Windows can verify the self-signed files.
           $cer = Join-Path $env:RUNNER_TEMP 'ssy-signing.cer'
           Export-Certificate -Cert $cert -FilePath $cer | Out-Null
-          Import-Certificate -FilePath $cer -CertStoreLocation Cert:\CurrentUser\Root | Out-Null
-          Import-Certificate -FilePath $cer -CertStoreLocation Cert:\CurrentUser\TrustedPublisher | Out-Null
+          & certutil.exe -user -f -addstore Root $cer | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to trust certificate on the runner' }
+          & certutil.exe -user -f -addstore TrustedPublisher $cer | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to add trusted publisher on the runner' }
           Remove-Item -LiteralPath $cer -Force
           "WINDOWS_CERT_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           $config = @{ bundle = @{ windows = @{ certificateThumbprint = $cert.Thumbprint; digestAlgorithm = 'sha256' } } } | ConvertTo-Json -Depth 5
