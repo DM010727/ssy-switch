@@ -194,7 +194,7 @@ jobs:
               $env:GIT_ASKPASS = $askpass
               [IO.File]::WriteAllText($askpass, "@echo off`r`necho %~1 | findstr /i username >nul`r`nif not errorlevel 1 (echo x-access-token) else (echo %PRIVATE_REPO_TOKEN%)`r`n")
             }
-            pnpm tauri build --target x86_64-pc-windows-msvc --bundles msi,nsis --config (Join-Path $env:RUNNER_TEMP 'tauri-signing.json')
+            pnpm tauri build --target x86_64-pc-windows-msvc --bundles 'msi,nsis' --config (Join-Path $env:RUNNER_TEMP 'tauri-signing.json')
             if ($LASTEXITCODE -ne 0) { throw 'Tauri build failed' }
           } finally { Remove-Item -LiteralPath $askpass -Force -ErrorAction SilentlyContinue }
       - name: Verify and collect Windows packages
