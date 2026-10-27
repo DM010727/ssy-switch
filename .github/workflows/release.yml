@@ -20,14 +20,14 @@ jobs:
           node-version-file: .node-version
       - name: Install Rust targets
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
-      - name: Install frontend dependencies
-        env:
-          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+      - name: Install pnpm
+        shell: bash
         run: |
-          npm install --global corepack@0.31.0 --force
-          corepack enable
-          corepack install
-          pnpm install --frozen-lockfile
+          npm install --global pnpm@10.12.3 --force
+          prefix=$(npm prefix --global)
+          if [ "$RUNNER_OS" = Windows ]; then echo "$prefix" >> "$GITHUB_PATH"; else echo "$prefix/bin" >> "$GITHUB_PATH"; fi
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
       - name: Import Developer ID certificate
         shell: bash
         env:
@@ -136,14 +136,14 @@ jobs:
           node-version-file: .node-version
       - name: Install Rust target
         run: rustup target add x86_64-pc-windows-msvc
-      - name: Install frontend dependencies
-        env:
-          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+      - name: Install pnpm
+        shell: bash
         run: |
-          npm install --global corepack@0.31.0 --force
-          corepack enable
-          corepack install
-          pnpm install --frozen-lockfile
+          npm install --global pnpm@10.12.3 --force
+          prefix=$(npm prefix --global)
+          if [ "$RUNNER_OS" = Windows ]; then echo "$prefix" >> "$GITHUB_PATH"; else echo "$prefix/bin" >> "$GITHUB_PATH"; fi
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
       - name: Import persistent self-signed certificate
         shell: pwsh
         env:
