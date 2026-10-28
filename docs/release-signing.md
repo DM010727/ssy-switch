@@ -1,6 +1,6 @@
 # 手动打包与签名
 
-仓库的 `Signed desktop builds` 工作流通过 GitHub Actions 手动构建 Windows x64 和 macOS 通用版本，产物保存在该次运行的 Actions artifacts 中，不会自动创建或修改 GitHub Release。工作流需先存在于仓库默认分支，才会出现在 Actions 的手动运行菜单；运行时选择的可信分支或 tag 同时决定工作流代码和构建代码。
+仓库的 `Signed desktop builds` 工作流位于独立的 `.github/workflows/signed-desktop-builds.yml`，通过 GitHub Actions 手动构建 Windows x64 和 macOS 通用版本，产物保存在该次运行的 Actions artifacts 中，不会自动创建或修改 GitHub Release。它不改变原有的 `.github/workflows/release.yml` 多平台发布流程。工作流需先存在于仓库默认分支，才会出现在 Actions 的手动运行菜单；运行时选择的可信分支或 tag 同时决定工作流代码和构建代码。
 
 ## 准备密钥
 
