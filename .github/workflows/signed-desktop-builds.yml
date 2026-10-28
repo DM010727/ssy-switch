@@ -99,6 +99,7 @@ jobs:
           lipo -verify_arch x86_64 arm64 "$app/Contents/MacOS/$executable"
           codesign --verify --deep --strict --verbose=2 "$app"
           codesign -dv --verbose=4 "$app" 2>&1 | grep -Fx "TeamIdentifier=$APPLE_TEAM_ID"
+          xcrun stapler staple "$app"
           xcrun stapler validate "$app"
           spctl --assess --type execute --verbose=2 "$app"
           # Tauri notarizes the app. Sign, submit, and staple the distributable DMG too.
